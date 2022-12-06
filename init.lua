@@ -267,6 +267,25 @@ local function on_attach(client, buffer)
   -- Goto previous/next diagnostic warning/error
   vim.keymap.set("n", "g[", vim.diagnostic.goto_prev, keymap_opts)
   vim.keymap.set("n", "g]", vim.diagnostic.goto_next, keymap_opts)
+
+  if client.server_capabilities.documentHighlightProvider then
+    vim.cmd [[	
+      hi! LspReferenceRead cterm=bold ctermbg=235 guibg=Grey
+      hi! LspReferenceText cterm=bold ctermbg=235 guibg=Grey
+      hi! LspReferenceWrite cterm=bold ctermbg=235 guibg=Grey
+    ]]
+    vim.api.nvim_create_augroup('lsp_document_highlight', {})
+    vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
+      group = 'lsp_document_highlight',
+      buffer = 0,
+      callback = vim.lsp.buf.document_highlight,
+    })
+    vim.api.nvim_create_autocmd({'CursorMoved', 'CursorMovedI'}, {
+      group = 'lsp_document_highlight',
+      buffer = 0,
+      callback = vim.lsp.buf.clear_references,
+    })
+  end
 end
 
 -- Configure LSP through rust-tools.nvim plugin.
